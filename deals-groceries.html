@@ -7,6 +7,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+.card-row { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+.card-result {
+  border: 1.5px solid var(--line); border-radius: 18px; padding: 18px 20px; background: var(--cream);
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; text-decoration: none; color: var(--ink);
+}
+.card-result.best { border-color: var(--sage); background: #F2F6EE; }
+.card-result .name { font-weight: 600; font-size: 15px; }
+.card-result .fee { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.card-result .amt { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; white-space: nowrap; }
+.card-result .best-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sage-deep); font-weight: 700; }
+.disclosure { font-size: 12.5px; color: var(--ink-soft); margin-top: 16px; text-align: center; }
+</style>
 </head>
 <body>
 
@@ -33,23 +46,23 @@
   <div class="section-label">Free forever</div>
   <h2 class="section-title">Grocery Budget</h2>
   <div class="tool-card">
-    <div class="field"><label for="g-people">People in your household</label><input type="number" id="g-people" placeholder="e.g. 2"></div>
+    <div class="field"><label for="g-people">People in your household</label><input type="number" id="g-people" placeholder="e.g. 2" value="1"></div>
     <div class="field">
       <label for="g-style">Eating style</label>
       <select id="g-style">
-        <option value="120">Budget-conscious, mostly basics</option>
-        <option value="180" selected>Average — mix of basics and treats</option>
-        <option value="260">Higher spend — quality/specialty ingredients</option>
+        <option value="385">Budget-conscious, mostly basics</option>
+        <option value="470" selected>Average — mix of basics and treats</option>
+        <option value="560">Higher spend — quality/specialty ingredients</option>
       </select>
     </div>
-    <button class="calc-btn" onclick="calcGrocery()">Suggest a weekly budget</button>
+    <button class="calc-btn" onclick="calcGrocery()">Suggest a budget</button>
     <div class="result" id="grocery-result">
-      <div class="label">Suggested weekly grocery budget</div>
-      <div class="big" id="grocery-weekly">$0</div>
+      <div class="label">Suggested monthly grocery budget</div>
+      <div class="big" id="grocery-monthly">$0</div>
       <div class="split">
-        <div><div class="label">Per month</div><div class="amt" id="grocery-monthly">$0</div></div>
+        <div><div class="label">Per week</div><div class="amt" id="grocery-weekly">$0</div></div>
       </div>
-      <div class="note">A rough starting point — adjust based on your actual receipts over a couple of weeks.</div>
+      <div class="note">Based on 2026 Statistics Canada household spending data, adjusted for household size — solo shoppers pay more per person since bulk buying isn't practical. Your actual number will vary by city and store.</div>
     </div>
   </div>
 </section>
@@ -63,11 +76,12 @@
     <div class="field"><label for="cc-restaurants">Monthly restaurants</label><input type="number" id="cc-restaurants" placeholder="$ 0"></div>
     <div class="field"><label for="cc-gas">Monthly gas</label><input type="number" id="cc-gas" placeholder="$ 0"></div>
     <div class="field"><label for="cc-other">Monthly everything else</label><input type="number" id="cc-other" placeholder="$ 0"></div>
-    <button class="calc-btn" onclick="calcRewards()">See which type of card fits</button>
+    <button class="calc-btn" onclick="calcRewards()">Compare cards for my spending</button>
+
     <div class="result" id="rewards-result">
-      <div class="label">Estimated rewards per year</div>
-      <div class="big" id="rewards-best">$0</div>
-      <div class="note" id="rewards-note"></div>
+      <div class="label">Ranked for your spending — best net reward first</div>
+      <div class="card-row" id="card-row"></div>
+      <p class="disclosure">Some of these links may earn us a commission if you apply. That never changes the ranking — it's based only on your numbers above.</p>
     </div>
   </div>
 </section>
@@ -82,37 +96,73 @@
 <script>
 function calcGrocery() {
   const people = parseFloat(document.getElementById('g-people').value) || 1;
-  const perPerson = parseFloat(document.getElementById('g-style').value);
-  const weekly = people * (perPerson / 4.33);
-  document.getElementById('grocery-weekly').textContent = '$' + weekly.toFixed(0);
-  document.getElementById('grocery-monthly').textContent = '$' + (weekly * 4.33).toFixed(0);
+  const basePerson = parseFloat(document.getElementById('g-style').value);
+  // Economies of scale: cost per household scales sub-linearly with people (bulk buying, less waste)
+  const monthly = basePerson * Math.pow(people, 0.85);
+  document.getElementById('grocery-monthly').textContent = '$' + monthly.toFixed(0);
+  document.getElementById('grocery-weekly').textContent = '$' + (monthly / 4.33).toFixed(0);
   document.getElementById('grocery-result').classList.add('show');
 }
 
+// Real published 2026 rates (Ratehub / FinlyWealth) — recheck periodically, rates change
+const CARDS = [
+  {
+    name: "CIBC Dividend Visa Infinite",
+    rates: { groceries: 0.04, gas: 0.04, restaurants: 0.02, other: 0.01 },
+    fee: 120,
+    url: "#" // TODO: replace with real Ratehub/CIBC affiliate link once program is approved
+  },
+  {
+    name: "Scotiabank Momentum Visa Infinite",
+    rates: { groceries: 0.04, gas: 0.02, restaurants: 0.01, other: 0.01 },
+    fee: 120,
+    url: "#" // TODO: replace with real affiliate link
+  },
+  {
+    name: "Tangerine Money-Back World Mastercard",
+    rates: { groceries: 0.02, gas: 0.02, restaurants: 0.005, other: 0.005 },
+    fee: 0,
+    url: "#" // TODO: replace with real affiliate link
+  }
+];
+
 function calcRewards() {
-  const groceries = parseFloat(document.getElementById('cc-groceries').value) || 0;
-  const restaurants = parseFloat(document.getElementById('cc-restaurants').value) || 0;
-  const gas = parseFloat(document.getElementById('cc-gas').value) || 0;
-  const other = parseFloat(document.getElementById('cc-other').value) || 0;
+  const spend = {
+    groceries: parseFloat(document.getElementById('cc-groceries').value) || 0,
+    gas: parseFloat(document.getElementById('cc-gas').value) || 0,
+    restaurants: parseFloat(document.getElementById('cc-restaurants').value) || 0,
+    other: parseFloat(document.getElementById('cc-other').value) || 0
+  };
 
-  // Simple illustrative reward-rate model across categories
-  const annual = (groceries * 0.03 + restaurants * 0.02 + gas * 0.02 + other * 0.01) * 12;
-  document.getElementById('rewards-best').textContent = '$' + annual.toFixed(0);
+  const results = CARDS.map(card => {
+    const annualEarn = 12 * (
+      spend.groceries * card.rates.groceries +
+      spend.gas * card.rates.gas +
+      spend.restaurants * card.rates.restaurants +
+      spend.other * card.rates.other
+    );
+    const net = annualEarn - card.fee;
+    return { ...card, annualEarn, net };
+  }).sort((a, b) => b.net - a.net);
 
-  let topCategory = 'everyday spending';
-  if (groceries >= restaurants && groceries >= gas) topCategory = 'groceries';
-  else if (restaurants >= gas) topCategory = 'restaurants';
-  else topCategory = 'gas';
-
-  document.getElementById('rewards-note').textContent =
-    "Since " + topCategory + " is your biggest category, a card with a higher rewards rate there would earn you the most — this is a rough estimate, not a specific card recommendation yet.";
+  const row = document.getElementById('card-row');
+  row.innerHTML = '';
+  results.forEach((card, i) => {
+    const el = document.createElement('a');
+    el.href = card.url;
+    el.className = 'card-result' + (i === 0 ? ' best' : '');
+    el.innerHTML = `
+      <div>
+        ${i === 0 ? '<div class="best-tag">Best fit for you</div>' : ''}
+        <div class="name">${card.name}</div>
+        <div class="fee">${card.fee === 0 ? 'No annual fee' : '$' + card.fee + '/yr fee'}</div>
+      </div>
+      <div class="amt">$${card.net.toFixed(0)}/yr net</div>
+    `;
+    row.appendChild(el);
+  });
   document.getElementById('rewards-result').classList.add('show');
 }
-
-function loadSharedProfile() {
-  // placeholder for future shared-profile integration on this page
-}
-loadSharedProfile();
 </script>
 
 </body>
