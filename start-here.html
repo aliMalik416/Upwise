@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start Here — plainlyHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">plainly<span>Human</span></a>
+  <nav>
+    <a href="start-here.html" class="active">Start Here</a>
+    <a href="finance.html">Finance</a>
+    <a href="work.html">Work</a>
+    <a href="school.html">School</a>
+    <a href="worth.html">What's It Worth?</a>
+    <a href="deals-groceries.html">Deals &amp; Groceries</a>
+  </nav>
+</header>
+
+<section class="page-hero">
+  <span class="eyebrow">Your profile</span>
+  <h1>Start Here</h1>
+  <p class="sub">Tell us your numbers once. Every calculator on plainlyHuman will use them automatically — no retyping.</p>
+</section>
+
+<section class="tool-section">
+  <div class="tool-card">
+    <div class="field"><label for="p-takehome">Monthly take-home pay</label><input type="number" id="p-takehome" placeholder="$ 0"></div>
+    <div class="field"><label for="p-rent">Rent or mortgage</label><input type="number" id="p-rent" placeholder="$ 0"></div>
+    <div class="field"><label for="p-debt">Debt payments</label><input type="number" id="p-debt" placeholder="$ 0"></div>
+    <div class="field"><label for="p-transport">Transportation</label><input type="number" id="p-transport" placeholder="$ 0"></div>
+    <div class="field"><label for="p-food">Food</label><input type="number" id="p-food" placeholder="$ 0"></div>
+    <div class="field"><label for="p-other">Other bills</label><input type="number" id="p-other" placeholder="$ 0"></div>
+    <button class="calc-btn" onclick="saveProfile()">Save my situation</button>
+
+    <div class="result" id="p-result">
+      <div class="label">Money left over each month</div>
+      <div class="big" id="p-left">$0</div>
+      <div class="note" id="p-note"></div>
+    </div>
+  </div>
+  <p style="text-align:center; margin-top:20px; font-size:14px; color:var(--ink-soft);">
+    Saved right in your browser — nothing is sent anywhere. <a href="#" onclick="clearProfile();return false;" style="text-decoration:underline;">Clear my saved info</a>
+  </p>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="foot-brand">plainlyHuman — tools for real life.</div>
+    <div class="foot-links"><a href="about.html">About Us</a><a href="how-we-make-money.html">How We Make Money</a></div>
+  </div>
+</footer>
+
+<script>
+function loadProfile() {
+  const saved = localStorage.getItem('plainlyhuman_profile');
+  if (!saved) return;
+  const p = JSON.parse(saved);
+  document.getElementById('p-takehome').value = p.takehome || '';
+  document.getElementById('p-rent').value = p.rent || '';
+  document.getElementById('p-debt').value = p.debt || '';
+  document.getElementById('p-transport').value = p.transport || '';
+  document.getElementById('p-food').value = p.food || '';
+  document.getElementById('p-other').value = p.other || '';
+  showSummary(p);
+}
+function saveProfile() {
+  const p = {
+    takehome: parseFloat(document.getElementById('p-takehome').value) || 0,
+    rent: parseFloat(document.getElementById('p-rent').value) || 0,
+    debt: parseFloat(document.getElementById('p-debt').value) || 0,
+    transport: parseFloat(document.getElementById('p-transport').value) || 0,
+    food: parseFloat(document.getElementById('p-food').value) || 0,
+    other: parseFloat(document.getElementById('p-other').value) || 0
+  };
+  localStorage.setItem('plainlyhuman_profile', JSON.stringify(p));
+  showSummary(p);
+}
+function showSummary(p) {
+  const left = p.takehome - p.rent - p.debt - p.transport - p.food - p.other;
+  document.getElementById('p-left').textContent = '$' + left.toFixed(0);
+  document.getElementById('p-note').textContent = left < 0
+    ? "Your bills add up to more than your take-home pay right now — the Debt Payoff and Survive Until Payday tools can help find room."
+    : "This will now auto-fill your take-home pay across Finance, Work, and Deals & Groceries tools.";
+  document.getElementById('p-result').classList.add('show');
+}
+function clearProfile() {
+  localStorage.removeItem('plainlyhuman_profile');
+  document.querySelectorAll('.tool-card input').forEach(i => i.value = '');
+  document.getElementById('p-result').classList.remove('show');
+}
+loadProfile();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deals &amp; Groceries — plainlyHuman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">plainly<span>Human</span></a>
+  <nav>
+    <a href="start-here.html">Start Here</a>
+    <a href="finance.html">Finance</a>
+    <a href="work.html">Work</a>
+    <a href="school.html">School</a>
+    <a href="worth.html">What's It Worth?</a>
+    <a href="deals-groceries.html" class="active">Deals &amp; Groceries</a>
+  </nav>
+</header>
+
+<section class="page-hero">
+  <span class="eyebrow">Everyday savings</span>
+  <h1>Deals &amp; Groceries</h1>
+  <p class="sub">Spend less on the things you're already buying.</p>
+</section>
+
+<!-- GROCERY BUDGET -->
+<section class="tool-section" id="grocery">
+  <div class="section-label">Free forever</div>
+  <h2 class="section-title">Grocery Budget</h2>
+  <div class="tool-card">
+    <div class="field"><label for="g-people">People in your household</label><input type="number" id="g-people" placeholder="e.g. 2"></div>
+    <div class="field">
+      <label for="g-style">Eating style</label>
+      <select id="g-style">
+        <option value="120">Budget-conscious, mostly basics</option>
+        <option value="180" selected>Average — mix of basics and treats</option>
+        <option value="260">Higher spend — quality/specialty ingredients</option>
+      </select>
+    </div>
+    <button class="calc-btn" onclick="calcGrocery()">Suggest a weekly budget</button>
+    <div class="result" id="grocery-result">
+      <div class="label">Suggested weekly grocery budget</div>
+      <div class="big" id="grocery-weekly">$0</div>
+      <div class="split">
+        <div><div class="label">Per month</div><div class="amt" id="grocery-monthly">$0</div></div>
+      </div>
+      <div class="note">A rough starting point — adjust based on your actual receipts over a couple of weeks.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CREDIT CARD REWARDS -->
+<section class="tool-section" id="creditcard">
+  <div class="section-label">Deals</div>
+  <h2 class="section-title">Credit Card Rewards Calculator</h2>
+  <div class="tool-card">
+    <div class="field"><label for="cc-groceries">Monthly groceries</label><input type="number" id="cc-groceries" placeholder="$ 0"></div>
+    <div class="field"><label for="cc-restaurants">Monthly restaurants</label><input type="number" id="cc-restaurants" placeholder="$ 0"></div>
+    <div class="field"><label for="cc-gas">Monthly gas</label><input type="number" id="cc-gas" placeholder="$ 0"></div>
+    <div class="field"><label for="cc-other">Monthly everything else</label><input type="number" id="cc-other" placeholder="$ 0"></div>
+    <button class="calc-btn" onclick="calcRewards()">See which type of card fits</button>
+    <div class="result" id="rewards-result">
+      <div class="label">Estimated rewards per year</div>
+      <div class="big" id="rewards-best">$0</div>
+      <div class="note" id="rewards-note"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="foot-brand">plainlyHuman — tools for real life.</div>
+    <div class="foot-links"><a href="about.html">About Us</a><a href="how-we-make-money.html">How We Make Money</a></div>
+  </div>
+</footer>
+
+<script>
+function calcGrocery() {
+  const people = parseFloat(document.getElementById('g-people').value) || 1;
+  const perPerson = parseFloat(document.getElementById('g-style').value);
+  const weekly = people * (perPerson / 4.33);
+  document.getElementById('grocery-weekly').textContent = '$' + weekly.toFixed(0);
+  document.getElementById('grocery-monthly').textContent = '$' + (weekly * 4.33).toFixed(0);
+  document.getElementById('grocery-result').classList.add('show');
+}
+
+function calcRewards() {
+  const groceries = parseFloat(document.getElementById('cc-groceries').value) || 0;
+  const restaurants = parseFloat(document.getElementById('cc-restaurants').value) || 0;
+  const gas = parseFloat(document.getElementById('cc-gas').value) || 0;
+  const other = parseFloat(document.getElementById('cc-other').value) || 0;
+
+  // Simple illustrative reward-rate model across categories
+  const annual = (groceries * 0.03 + restaurants * 0.02 + gas * 0.02 + other * 0.01) * 12;
+  document.getElementById('rewards-best').textContent = '$' + annual.toFixed(0);
+
+  let topCategory = 'everyday spending';
+  if (groceries >= restaurants && groceries >= gas) topCategory = 'groceries';
+  else if (restaurants >= gas) topCategory = 'restaurants';
+  else topCategory = 'gas';
+
+  document.getElementById('rewards-note').textContent =
+    "Since " + topCategory + " is your biggest category, a card with a higher rewards rate there would earn you the most — this is a rough estimate, not a specific card recommendation yet.";
+  document.getElementById('rewards-result').classList.add('show');
+}
+
+function loadSharedProfile() {
+  // placeholder for future shared-profile integration on this page
+}
+loadSharedProfile();
+</script>
+
+</body>
+</html>
