@@ -1,0 +1,47 @@
+{
+  "last_verified": "2026-08-13",
+  "principles": [
+    "Personal calculations are labeled as calculations.",
+    "External benchmarks carry source and reference date.",
+    "Model scores are explicitly described as comparison models, not predictions.",
+    "Live/statistical price data should never be represented by a static placeholder as if it were current."
+  ],
+  "sources": [
+    {
+      "name": "Financial Consumer Agency of Canada",
+      "topic": "Emergency funds",
+      "url": "https://www.canada.ca/en/financial-consumer-agency/services/savings-investments/setting-up-emergency-funds.html",
+      "used_for": "3\u20136 month emergency-fund context and realistic-start guidance"
+    },
+    {
+      "name": "Financial Consumer Agency of Canada",
+      "topic": "Budgeting",
+      "url": "https://www.canada.ca/en/financial-consumer-agency/services/make-budget.html",
+      "used_for": "budget and goal-setting context"
+    },
+    {
+      "name": "Bank of Canada",
+      "topic": "Financial Stability Report 2026 \u2014 Households",
+      "url": "https://www.bankofcanada.ca/publications/financial-stability-report/financial-stability-report-2026/households/",
+      "used_for": "context on elevated household debt and differences in household financial pressure"
+    },
+    {
+      "name": "Statistics Canada",
+      "topic": "Food Price Data Hub",
+      "url": "https://www.statcan.gc.ca/en/topics-start/food-price",
+      "used_for": "food-price data architecture and official price references"
+    },
+    {
+      "name": "Job Bank Canada",
+      "topic": "Career planning",
+      "url": "https://www.jobbank.gc.ca/career-planning",
+      "used_for": "occupation, skills, education and labour-market exploration"
+    },
+    {
+      "name": "Statistics Canada",
+      "topic": "Postsecondary graduate outcomes",
+      "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710028701",
+      "used_for": "median employment income 2, 5 and 10 years after graduation by qualification and field"
+    }
+  ]
+}
