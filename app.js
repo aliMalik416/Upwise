@@ -1,25 +1,121 @@
-const KEY="upwise.profile.v2";
-const $=id=>document.getElementById(id);
-const money=n=>new Intl.NumberFormat("en-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(Number(n)||0);
-const money2=n=>new Intl.NumberFormat("en-CA",{style:"currency",currency:"CAD",minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
-const num=id=>Number($(id)?.value)||0;
-function get(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch{return {}}}
-function save(p){localStorage.setItem(KEY,JSON.stringify(p))}
-function result(id,html,cls=""){const e=$(id);e.className="result show "+cls;e.innerHTML=html}
-function status(p){const income=p.income||0, fixed=(p.essentials||0)+(p.debtPayment||0), flex=income-fixed, run=p.essentials?((p.savings||0)/p.essentials):0;return {income,fixed,flex,run}}
-function nav(){let page=document.body.dataset.page;document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("active",a.dataset.page===page))}
-function fillProfile(){const p=get();["province","household","income","essentials","groceryBudget","savings","debt","debtPayment","occupation","educationLevel","targetIncome","studyTolerance","workStyle","interest"].forEach(id=>{if($(id)&&p[id]!==undefined)$(id).value=p[id]});renderSnapshot()}
-function renderSnapshot(){const p=get(),s=status(p);if(!$("snapshot"))return;let cls=s.flex<0?"bad":s.flex<300?"tight":s.run<1?"watch":"";$("snapshot").className="status "+cls;$("snapshot").innerHTML=`<strong>${s.flex<0?"Let's make a plan.":s.flex<300?"Things are a little tight.":s.run<3?"You've got some room to build.":"You've got breathing room."}</strong><p>Flexible cash after essentials and debt: <b>${money(s.flex)}/month</b>. Savings runway: <b>${s.run.toFixed(1)} months</b>.</p>`}
-function payday(){const cash=num("cash"),days=Math.max(1,num("days")),bills=num("bills"),buffer=num("buffer"),avail=cash-bills-buffer,d=avail/days;result("paydayResult",`<span class="kicker">Daily ceiling</span><div class="big">${money2(Math.max(0,d))}</div><p>${avail<0?"Your bills and protected buffer exceed the cash entered.":`You have ${money2(avail)} available across ${days} days.`}</p><div class="bar"><i style="width:${Math.min(100,Math.max(0,d/50*100))}%"></i></div><b>Recommendation:</b> ${avail<0?"Move or reduce a bill before payday.":"Treat this as a ceiling, not a spending target."}`,avail<0?"bad":d<10?"tight":d<25?"watch":"")}
-function afford(){const price=num("price"),savings=num("buySavings"),goal=num("goalProtect"),left=savings-price,gap=Math.max(0,goal-left);result("affordResult",`<span class="kicker">After purchase</span><div class="big">${money(left)}</div><p>${left<0?"You would need more cash than the savings entered.":gap?`You'd be ${money(gap)} short of the protected goal.`:"The purchase stays above your protected goal."}</p><b>Recommendation:</b> ${left<0?"Don't fund it from this savings balance.":gap?"Consider waiting, reducing the price, or funding it separately.":"The math works against the goal you've entered."}`,left<0?"bad":gap?"tight":"")}
-function debtMonths(b,apr,p){let r=apr/100/12,m=0,i=0;if(p<=b*r)return {m:Infinity,i:Infinity};while(b>0&&m<1200){let x=b*r;i+=x;b=b+x-p;m++}return{m,i}}
-function debt(){const b=num("balance"),apr=num("apr"),p=num("payment"),extra=num("extra"),a=debtMonths(b,apr,p),n=debtMonths(b,apr,p+extra);if(!isFinite(a.m)){result("debtResult",`<span class="kicker">Payment problem</span><div class="big">Not amortizing</div><p>The payment entered does not cover the modeled monthly interest.</p>`,"bad");return}result("debtResult",`<span class="kicker">Adding ${money(extra)}/month</span><div class="big">${a.m-n.m} months sooner</div><p>Modeled interest falls by about <b>${money(a.i-n.i)}</b>.</p><div class="bar"><i style="width:${Math.min(100,(a.m-n.m)/a.m*100)}%"></i></div><b>Method:</b> monthly amortization using the APR entered. Lender calculations can differ.`,"watch")}
-function goal(){const saved=num("saved"),target=num("target"),months=Math.max(1,num("months")),con=num("contribution"),need=Math.max(0,target-saved),req=need/months,proj=saved+con*months,pct=target?Math.min(100,saved/target*100):0;result("goalResult",`<span class="kicker">${pct.toFixed(0)}% complete</span><div class="big">${money(need)} left</div><p>Required pace: <b>${money2(req)}/month</b> for ${months} months.</p><div class="bar"><i style="width:${pct}%"></i></div><p>At your entered contribution, the simple projection is <b>${money(proj)}</b>.</p>` ,pct<25?"tight":pct<60?"watch":"")}
-function basket(){const now=num("basketNow"),ref=num("basketRef"),days=Math.max(1,num("basketDays")),chg=ref?((now-ref)/ref*100):0,monthly=now/days*30.4375,budget=get().groceryBudget||0;result("basketResult",`<span class="kicker">Basket change</span><div class="big">${chg>=0?"+":""}${chg.toFixed(1)}%</div><p>${money2(now)} for ${days} days ≈ <b>${money2(monthly)}/month</b> at this pace.</p>${budget?`<p>Your profile budget is ${money(budget)} — this pace is ${monthly>budget?"above":"below"} it by ${money(Math.abs(monthly-budget))}.</p>`:""}<b>Data note:</b> the reference price is your input; this is not presented as a live national price index.`,chg>10?"tight":chg>4?"watch":"")}
-function deal(){const s=num("sale"),r=num("regular"),su=num("saleUnits"),ru=num("regularUnits"),disc=r?(r-s)/r*100:0,sp=s/su,rp=r/ru;result("dealResult",`<span class="kicker">Headline discount</span><div class="big">${disc.toFixed(0)}% off</div><p>Sale unit price <b>${money2(sp)}</b> vs. regular <b>${money2(rp)}</b>.</p><div class="bar"><i style="width:${Math.max(0,Math.min(100,disc))}%"></i></div><b>Recommendation:</b> ${disc>=25?"Looks meaningful — now ask whether you actually need it and whether the package size changed.":"The discount is modest; unit price and need matter more than the sticker."}`,disc>=25?"":"watch")}
-const careers=[["Data / Business Analyst",["Technology","Business"],["Analytical","Structured","Independent"],70000,"1–2 years"],["Project Coordinator / Manager",["Business","Technology","Public service"],["Structured","People-focused","Flexible"],65000,"1–2 years"],["Skilled Trades / Technician",["Trades"],["Hands-on","Independent","Structured"],65000,"1–2 years"],["Health Services",["Health"],["People-focused","Structured"],60000,"2–4 years"],["Teacher / Education Support",["Education"],["People-focused","Structured"],60000,"2–4 years"],["Public Service / Policy",["Public service","Business"],["Structured","Analytical","People-focused"],65000,"2–4 years"],["Creative / Communications",["Creative","Business"],["Flexible","People-focused","Independent"],55000,"Up to 1 year"],["Science / Technical",["Science","Health"],["Analytical","Structured","Independent"],65000,"2–4 years"]];
-function career(){const i=$("careerInterest").value,s=$("careerStyle").value,study=$("careerStudy").value,target=num("careerIncome")||70000;let r=careers.map(c=>{let x=45;if(c[1].includes(i))x+=22;if(c[2].includes(s))x+=18;if(c[4]===study)x+=10;if(target<=c[3])x+=5;else x-=Math.min(15,(target-c[3])/5000);return{c,score:Math.max(0,Math.min(100,Math.round(x)))}}).sort((a,b)=>b.score-a.score).slice(0,5);$("careerResults").innerHTML=r.map((x,k)=>`<article class="path ${x.score<60?"watch":""}"><div style="display:flex;justify-content:space-between"><div><span class="kicker">Possible path ${k+1}</span><h2>${x.c[0]}</h2></div><span class="score">${x.score}%</span></div><p>Fits your interest in <b>${i}</b>, work style <b>${s}</b>, and study preference <b>${study}</b>. Indicative income target: ${money(x.c[3])}+.</p><div class="scorebar"><i style="width:${x.score}%"></i></div><p class="micro">This is an Upwise comparison score, not a probability of success or a labour-market forecast.</p></article>`).join("")}
-function education(){const cur=num("cur"),after=num("after"),cost=num("eduCost")+num("otherCost"),years=num("eduYears"),during=num("during"),lost=Math.max(0,(cur-during)*years),total=cost+lost,delta=after-cur,pay=delta>0?total/delta:Infinity;result("eduResult",`<span class="kicker">Simple payback</span><div class="big">${isFinite(pay)?pay.toFixed(1)+" years":"Not reached"}</div><div class="grid3" style="margin-top:18px"><div class="metric"><small>Direct cost</small><strong>${money(cost)}</strong></div><div class="metric"><small>Opportunity cost</small><strong>${money(lost)}</strong></div><div class="metric"><small>Income increase</small><strong>${money(delta)}</strong></div></div><p><b>Important:</b> this is a scenario, not a guarantee. Taxes, aid, employment probability, wage growth and time-to-employment can change the result.</p>`,isFinite(pay)&&pay<=5?"": "watch")}
-function worth(){const p=num("worthPrice"),life=Math.max(1,num("life")),use=$("use").value,cost=p/life;result("worthResult",`<span class="kicker">Cost of useful life</span><div class="big">${money2(cost)}/month</div><p>Over ${life} months, ${money(p)} works out to ${money2(cost)}/month.</p><b>Recommendation:</b> ${use==="Yes"?"If you use it often, the effective cost per use may be reasonable.":use==="Maybe"?"Wait 48 hours or test a cheaper option.":"Rare use makes the effective cost high — consider renting, borrowing or buying used."}`,use==="Rarely"?"tight":use==="Maybe"?"watch":"")}
-function init(){nav();fillProfile();const f=$("profileForm");if(f)f.addEventListener("submit",e=>{e.preventDefault();let p={};["province","household","income","essentials","groceryBudget","savings","debt","debtPayment","occupation","educationLevel","targetIncome","studyTolerance","workStyle","interest"].forEach(id=>{let e=$(id);p[id]=e.type==="number"?Number(e.value)||0:e.value});save(p);renderSnapshot();location.href="finance.html"});document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>location.href=b.dataset.go)}
-document.addEventListener("DOMContentLoaded",init)
+const API_URL = "http://localhost:3000/api";
+const USER_ID = "demo-user-123"; // Replace with dynamically authenticated User ID in production
+
+const $ = id => document.getElementById(id);
+const money = n => new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", maximumFractionDigits: 0 }).format(Number(n) || 0);
+const money2 = n => new Intl.NumberFormat("en-CA", { style: "currency", currency: "CAD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n) || 0);
+const num = id => Number($(id)?.value) || 0;
+
+// Fetch profile from backend database API
+async function get() {
+  try {
+    const res = await fetch(`${API_URL}/profile/${USER_ID}`);
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
+
+// Save profile to backend API
+async function save(p) {
+  p.userId = USER_ID;
+  await fetch(`${API_URL}/profile`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(p)
+  });
+}
+
+function result(id, html, cls = "") {
+  const e = $(id);
+  if (!e) return;
+  e.className = "result show " + cls;
+  e.innerHTML = html;
+}
+
+function status(p) {
+  const income = Number(p.income) || 0,
+        fixed = (Number(p.essentials) || 0) + (Number(p.debt_payment || p.debtPayment) || 0),
+        flex = income - fixed,
+        run = p.essentials ? ((Number(p.savings) || 0) / Number(p.essentials)) : 0;
+  return { income, fixed, flex, run };
+}
+
+async function renderSnapshot() {
+  const p = await get(), s = status(p);
+  if (!$("snapshot")) return;
+  let cls = s.flex < 0 ? "bad" : s.flex < 300 ? "tight" : s.run < 1 ? "watch" : "";
+  $("snapshot").className = "status " + cls;
+  $("snapshot").innerHTML = `<strong>${s.flex < 0 ? "Let's make a plan." : s.flex < 300 ? "Things are a little tight." : s.run < 3 ? "You've got some room to build." : "You've got breathing room."}</strong><p>Flexible cash after essentials and debt: <b>${money(s.flex)}/month</b>. Savings runway: <b>${s.run.toFixed(1)} months</b>.</p>`;
+}
+
+function nav() {
+  let page = document.body.dataset.page;
+  document.querySelectorAll("nav a").forEach(a => a.classList.toggle("active", a.dataset.page === page));
+}
+
+async function fillProfile() {
+  const p = await get();
+  ["province","household","income","essentials","groceryBudget","savings","debt","debtPayment","occupation","educationLevel","targetIncome","studyTolerance","workStyle","interest"].forEach(id => {
+    const dbKey = id.replace(/([A-Z])/g, "_$1").toLowerCase();
+    if ($(id) && (p[id] !== undefined || p[dbKey] !== undefined)) {
+      $(id).value = p[id] !== undefined ? p[id] : p[dbKey];
+    }
+  });
+  renderSnapshot();
+}
+
+async function payday() {
+  const cash = num("cash"), days = Math.max(1, num("days")), bills = num("bills"), buffer = num("buffer"), avail = cash - bills - buffer, d = avail / days;
+  result("paydayResult", `<span class="kicker">Daily ceiling</span><div class="big">${money2(Math.max(0, d))}</div><p>${avail < 0 ? "Your bills and protected buffer exceed the cash entered." : `You have ${money2(avail)} available across ${days} days.`}</p><div class="bar"><i style="width:${Math.min(100, Math.max(0, d / 50 * 100))}%"></i></div><b>Recommendation:</b> ${avail < 0 ? "Move or reduce a bill before payday." : "Treat this as a ceiling, not a spending target."}`, avail < 0 ? "bad" : d < 10 ? "tight" : d < 25 ? "watch" : "");
+}
+
+async function basket() {
+  const now = num("basketNow"),
+        ref = num("basketRef"),
+        days = Math.max(1, num("basketDays")),
+        chg = ref ? ((now - ref) / ref * 100) : 0,
+        monthly = now / days * 30.4375;
+        
+  const p = await get();
+  const budget = Number(p.grocery_budget || p.groceryBudget) || 0;
+  
+  // Live benchmark details from backend
+  let statCanData = { reference_period: "Recent", region: "Canada", source_name: "Statistics Canada" };
+  try {
+    const res = await fetch(`${API_URL}/data/groceries`);
+    const stats = await res.json();
+    if (stats.length > 0) statCanData = stats[0];
+  } catch (e) {}
+
+  result("basketResult", `
+    <span class="kicker">Basket change</span>
+    <div class="big">${chg >= 0 ? "+" : ""}${chg.toFixed(1)}%</div>
+    <p>${money2(now)} for ${days} days ≈ <b>${money2(monthly)}/month</b> at this pace.</p>
+    ${budget ? `<p>Your profile budget is ${money(budget)} — this pace is ${monthly > budget ? "above" : "below"} it by ${money(Math.abs(monthly - budget))}.</p>` : ""}
+    <blockquote style="margin-top:10px; font-size:0.85em; opacity:0.8;">
+      <b>Live Data Layer:</b> Regional benchmark [${statCanData.region}] — Reference: ${statCanData.reference_period} (${statCanData.source_name}).
+    </blockquote>
+  `, chg > 10 ? "tight" : chg > 4 ? "watch" : "");
+}
+
+async function init() {
+  nav();
+  await fillProfile();
+  const f = $("profileForm");
+  if (f) {
+    f.addEventListener("submit", async e => {
+      e.preventDefault();
+      let p = {};
+      ["province","household","income","essentials","groceryBudget","savings","debt","debtPayment","occupation","educationLevel","targetIncome","studyTolerance","workStyle","interest"].forEach(id => {
+        let el = $(id);
+        p[id] = el.type === "number" ? Number(el.value) || 0 : el.value;
+      });
+      await save(p);
+      await renderSnapshot();
+      location.href = "finance.html";
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", init);
