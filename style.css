@@ -1,24 +1,24 @@
 /* ==========================================================================
-   Upwise Modern "Warm Tech" Design System v2
+   Upwise Modern "Slate & Charcoal" Design System
    ========================================================================== */
 
 :root {
-  --bg-main: #f4f6f3;
+  --bg-main: #f8fafc;
   --surface: #ffffff;
-  --surface-subtle: #fafbf9;
-  --primary: #1f382d;
-  --primary-hover: #14251d;
-  --primary-light: #e5ede8;
-  --accent-gold: #c68a15;
-  --accent-peach: #f3ece1;
-  --text-main: #111a15;
-  --text-muted: #53635a;
-  --border: #dce3de;
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shadow-sm: 0 2px 8px rgba(27, 43, 35, 0.04);
-  --shadow-md: 0 12px 32px -4px rgba(27, 43, 35, 0.08);
-  --shadow-lg: 0 24px 60px -12px rgba(27, 43, 35, 0.12);
+  --surface-subtle: #f1f5f9;
+  --primary: #0f172a;
+  --primary-hover: #1e293b;
+  --primary-light: #e2e8f0;
+  --accent-gold: #d97706;
+  --accent-peach: #fef3c7;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #cbd5e1;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -44,7 +44,7 @@ body {
 }
 
 header {
-  background: rgba(244, 246, 243, 0.85);
+  background: rgba(248, 250, 252, 0.85);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
@@ -177,7 +177,7 @@ input, select {
 input:focus, select:focus {
   border-color: var(--primary);
   background: var(--surface);
-  box-shadow: 0 0 0 4px var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 /* Buttons */
@@ -242,21 +242,21 @@ input:focus, select:focus {
 }
 
 .result.good {
-  border-color: #1b5e20;
-  background: #edf7ed;
-  color: #103b13;
+  border-color: #16a34a;
+  background: #f0fdf4;
+  color: #14532d;
 }
 
 .result.watch {
-  border-color: #b75500;
-  background: #fff8e8;
-  color: #4a2200;
+  border-color: #d97706;
+  background: #fffbeb;
+  color: #78350f;
 }
 
 .result.tight {
-  border-color: #c62828;
-  background: #fdeded;
-  color: #5c1212;
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #7f1d1d;
 }
 
 .result .big {
@@ -281,7 +281,7 @@ input:focus, select:focus {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(17, 26, 21, 0.5);
+  background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -330,7 +330,7 @@ input:focus, select:focus {
   font-size: 0.85rem;
   color: var(--primary);
   font-weight: 600;
-  border: 1px solid rgba(31, 56, 45, 0.1);
+  border: 1px solid var(--border);
 }
 
 /* Footer */
