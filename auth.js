@@ -2,7 +2,7 @@
    Upwise Authentication & Data Sync Engine (Supabase + LocalStorage Fallback)
    ========================================================================== */
 
-const SUPABASE_URL = "https://aemnwcpigjhdmgvdeegy.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://aemnwcpigjhdmgvdeegy.supabase.co";
 const SUPABASE_ANON_KEY = "<sb_publishable_0pSWN51poc8Hf7zsuq1SFg_vS1PPNqH>";
 
 // Initialize Supabase Client
