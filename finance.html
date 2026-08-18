@@ -1,4 +1,102 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#58704f"><title>Finance — Upwise</title><link rel="stylesheet" href="style.css"></head><body data-page="finance">
-<header><div class="wrap nav"><a class="logo" href="index.html">upwise<b>.</b></a><nav><a href="index.html" data-page="home">Home</a><a href="start-here.html" data-page="start">Start Here</a><a href="finance.html" data-page="finance">Finance</a><a href="deals-groceries.html" data-page="groceries">Groceries</a><a href="career.html" data-page="career">Career</a><a href="education.html" data-page="education">Education</a><a href="worth.html" data-page="worth">Worth It?</a></nav><a class="btn outline small" href="start-here.html">My profile</a></div></header>
-<main class="wrap"><section class="page-head"><span class="kicker">Finance</span><h1>Your money, in context.</h1><p>Calculations use your inputs. External guidance is kept separate and sourced.</p></section><section id="snapshot" class="status"></section><section class="grid3" style="margin-bottom:18px"><div class="metric"><small>Take-home</small><strong id="finIncome">—</strong></div><div class="metric"><small>Fixed + debt</small><strong id="finFixed">—</strong></div><div class="metric"><small>Flexible room</small><strong id="finFlex">—</strong></div></section><section class="grid2"><article class="card tool"><span class="kicker">Cash flow</span><h2>Survive Until Payday</h2><div class="fields"><label>Cash now<input id="cash" type="number" placeholder="500"></label><label>Days to payday<input id="days" type="number" value="10"></label><label>Bills before payday<input id="bills" type="number" placeholder="100"></label><label>Protected buffer<input id="buffer" type="number" placeholder="50"></label></div><button class="btn primary" onclick="payday()">Calculate</button><div id="paydayResult"></div></article><article class="card tool"><span class="kicker">Affordability</span><h2>Can I afford this?</h2><div class="fields"><label>Purchase price<input id="price" type="number" placeholder="1200"></label><label>Savings to use<input id="buySavings" type="number" placeholder="1000"></label><label>Goal to protect<input id="goalProtect" type="number" placeholder="2000"></label></div><button class="btn primary" onclick="afford()">Reality check</button><div id="affordResult"></div></article><article class="card tool"><span class="kicker">Debt</span><h2>Payoff scenarios</h2><div class="fields"><label>Balance<input id="balance" type="number" placeholder="5000"></label><label>APR %<input id="apr" type="number" value="19.99"></label><label>Current payment<input id="payment" type="number" placeholder="200"></label><label>Extra/month<input id="extra" type="number" placeholder="75"></label></div><button class="btn primary" onclick="debt()">Compare</button><div id="debtResult"></div></article><article class="card tool"><span class="kicker">Goals</span><h2>Savings path</h2><div class="fields"><label>Saved now<input id="saved" type="number" placeholder="750"></label><label>Goal<input id="target" type="number" placeholder="3000"></label><label>Months<input id="months" type="number" value="12"></label><label>Monthly contribution<input id="contribution" type="number" placeholder="200"></label></div><button class="btn primary" onclick="goal()">Build path</button><div id="goalResult"></div></article></section><section class="card evidence"><div><span class="kicker">Evidence</span><h2>Benchmarks, not commandments.</h2><p>FCAC's emergency-fund guidance discusses working toward 3–6 months of regular expenses while starting with a realistic amount. Upwise shows that as context, not a pass/fail score.</p></div><a class="source" target="_blank" href="https://www.canada.ca/en/financial-consumer-agency/services/savings-investments/setting-up-emergency-funds.html">FCAC →</a></section></main><footer class="wrap"><span><b>Upwise.</b> Tools for real life.</span><span><a href="sources.html">Sources & methodology</a> · <a href="about.html">About</a></span></footer>
-<script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Finance — Upwise</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-javascript@2"></script>
+</head>
+<body data-page="finance">
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html">upwise<b>.</b></a>
+    <nav>
+      <a href="index.html" data-page="home">Home</a>
+      <a href="start-here.html" data-page="start">Start Here</a>
+      <a href="finance.html" data-page="finance">Finance</a>
+      <a href="deals-groceries.html" data-page="groceries">Groceries</a>
+      <a href="career.html" data-page="career">Career</a>
+      <a href="education.html" data-page="education">Education</a>
+      <a href="sources.html" data-page="sources">Sources</a>
+    </nav>
+    <div id="authContainer"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="page-head">
+    <span class="kicker">Finance</span>
+    <h1>Your money, in context.</h1>
+    <p>Clear financial tools that calculate decisions against your actual profile cash flow.</p>
+  </section>
+
+  <section class="grid2">
+    <article class="card">
+      <span class="kicker">Decision Tool</span>
+      <h2>Can I afford this?</h2>
+      <div class="fields">
+        <label>Item description<input id="item" type="text" placeholder="Laptop, travel, etc."></label>
+        <label>Cost<input id="cost" type="number" placeholder="1200"></label>
+      </div>
+      <button class="btn primary" onclick="afford()">Calculate</button>
+      <div id="affordResult"></div>
+    </article>
+
+    <article class="card">
+      <span class="kicker">Debt Payoff</span>
+      <h2>Payoff Timeline</h2>
+      <div class="fields">
+        <label>Current balance<input id="balance" type="number" placeholder="5000"></label>
+        <label>Interest rate (%)<input id="rate" type="number" step="0.1" value="19.9"></label>
+        <label>Monthly payment<input id="payment" type="number" placeholder="200"></label>
+        <label>Extra payment/mo<input id="extra" type="number" placeholder="100"></label>
+      </div>
+      <button class="btn primary" onclick="debt()">Model Payoff</button>
+      <div id="debtResult"></div>
+    </article>
+  </section>
+
+  <section class="card">
+    <span class="kicker">Savings Goals</span>
+    <h2>Build a path</h2>
+    <div class="fields">
+      <label>Current savings<input id="saved" type="number" placeholder="1000"></label>
+      <label>Target goal<input id="target" type="number" placeholder="5000"></label>
+      <label>Months timeline<input id="months" type="number" value="12"></label>
+      <label>Planned monthly addition<input id="contribution" type="number" placeholder="300"></label>
+    </div>
+    <button class="btn primary" onclick="goal()">Analyze Goal</button>
+    <div id="goalResult"></div>
+  </section>
+</main>
+
+<div id="authModal" class="modal-overlay">
+  <div class="modal">
+    <span class="kicker">Account Access</span>
+    <h2 style="margin-bottom:12px">Log in or Sign up</h2>
+    <form id="authForm">
+      <div class="fields" style="grid-template-columns:1fr;">
+        <label>Email<input id="authEmail" type="email" required placeholder="you@example.com"></label>
+        <label>Password<input id="authPassword" type="password" required placeholder="••••••••"></label>
+      </div>
+      <p id="authMsg" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;"></p>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button type="button" class="btn outline" onclick="closeAuthModal()">Cancel</button>
+        <button type="submit" class="btn primary">Continue</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <span><b>Upwise.</b> Tools for real life.</span>
+  <span><a href="sources.html">Sources</a> · <a href="about.html">About</a> · <a href="how-we-make-money.html">How we make money</a></span>
+</footer>
+
+<script src="auth.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
