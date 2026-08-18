@@ -1,0 +1,13 @@
+{
+  "cleanUrls": true,
+  "framework": null,
+  "buildCommand": null,
+  "installCommand": "echo 'skip install'",
+  "outputDirectory": ".",
+  "crons": [
+    {
+      "path": "/api/cron/statcan",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}
